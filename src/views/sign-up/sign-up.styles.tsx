@@ -109,3 +109,5 @@ export const Img = styled.img`
   width: auto;
   text-align: center;
 `;
+
+// export const Pick = styled.

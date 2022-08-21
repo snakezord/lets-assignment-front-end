@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, BaseSyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { User } from '../shared/modules/user/model';
@@ -12,18 +12,16 @@ export interface HookData {
   movies: Movie[];
   sitRows: number[];
   sitPlaces: number[];
-  handleChangeData: (fieldName: string, value: string) => void;
+  loading: boolean;
+  handleChangeData: (e: BaseSyntheticEvent) => void;
   handleChangeAvatar: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   handleClearAvatar: () => void;
-  handleChangeMovieId: (movieId: string) => void;
-  handleChangeSitRow: (value: string | undefined) => void;
-  handleChangeSitPlace: (value: string | undefined) => void;
 }
 
 const useSignUp = (): HookData => {
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState<User>({
     firstName: '',
     lastName: '',
@@ -36,7 +34,6 @@ const useSignUp = (): HookData => {
   });
 
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [movieId, setMovieId] = useState<string | undefined>(undefined);
 
   const sitRows = useMemo(() => {
     return range(1, 15);
@@ -49,27 +46,80 @@ const useSignUp = (): HookData => {
   // FILL IN THE GAPS
   // Handlers go here
   // ...
-  const handleChangeData = (fieldName: string, value: string) => {};
 
-  const handleChangeAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {};
+  useEffect(() => {
+    getMovies().then((movies) => setMovies(movies));
+  }, []);
 
-  const handleChangeMovieId = (movieId: string) => {};
-  const handleChangeSitRow = (value: string | undefined) => {};
-  const handleChangeSitPlace = (value: string | undefined) => {};
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleChangeAvatar = (e: React.ChangeEvent<HTMLInputElement>): void => {
     e.preventDefault();
 
-    await addUser(data);
+    if (e.target.files) {
+      const reader = new FileReader();
+      reader.addEventListener(
+        'load',
+        () => {
+          const res = reader.result;
+          if (res && typeof res === 'string') {
+            setData(
+              (prev) =>
+                ({
+                  ...prev,
+                  avatarBase64: res,
+                } as User)
+            );
+          }
+        },
+        false
+      );
 
-    navigate('/success');
+      reader.readAsDataURL(e.target.files[0]);
+    }
   };
 
-  const handleClearAvatar = (): void => {
-    setData((v) => ({
-      ...v,
-      avatarBase64: '',
-    }));
+  const handleClearAvatar = () =>
+    setData((prev) => {
+      return {
+        ...prev,
+        avatarBase64: '',
+      } as User;
+    });
+
+  const handleChangeData = (e: BaseSyntheticEvent) => {
+    const name = e.target.name;
+    let value = e.target.value;
+
+    if (name === 'avatarBase64') {
+      value = e.target.files[0];
+    }
+
+    if (name === 'movie') {
+      value = movies.find((movie) => movie.id === value);
+    }
+
+    setData(
+      (prev) =>
+        ({
+          ...prev,
+          [name]: value,
+        } as User)
+    );
+  };
+
+  const handleSubmit = async (e: BaseSyntheticEvent) => {
+    e.preventDefault();
+    console.log(data);
+    if (data && data.firstName && data.lastName && data.email && data.phone && data.avatarBase64) {
+      setLoading(true);
+      try {
+        await addUser(data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+        navigate('/success');
+      }
+    }
   };
 
   return {
@@ -77,13 +127,11 @@ const useSignUp = (): HookData => {
     movies,
     sitRows,
     sitPlaces,
+    loading,
     handleChangeData,
     handleChangeAvatar,
     handleSubmit,
     handleClearAvatar,
-    handleChangeMovieId,
-    handleChangeSitRow,
-    handleChangeSitPlace,
   };
 };
 
