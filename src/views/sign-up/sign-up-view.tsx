@@ -33,14 +33,14 @@ const SignUpView: React.FC<HookData> = ({ data, movies, loading, handleSubmit, h
             <ImageInput name='avatarBase64' label='Avatar' avatar={data?.avatarBase64} handleChangeAvatar={handleChangeAvatar} handleClear={handleClearAvatar} error={!data?.avatarBase64} />
             <Label>
               Pick movie
-              <Select name='movie' defaultValue={'DEFAULT'} value={data?.movie?.id} onChange={handleChangeData}>
+              <Select name='movie' defaultValue={'DEFAULT'} value={data?.movie?._id} onChange={handleChangeData}>
                 <option value="DEFAULT" disabled>Choose a movie...</option>
                 {
-                  movies.map(movie => (<option key={movie.id} value={movie.id}>{`${movie.title} / ${getLocaleDateString(movie.startDate)} / ${movie.duration / 1000 / 60}min`}</option>))
+                  movies.map(movie => (<option key={movie._id} value={movie._id}>{`${movie.title} / ${getLocaleDateString(movie.startDate)} / ${movie.duration / 1000 / 60}min`}</option>))
                 }
               </Select>
             </Label>
-            {data?.movie?.id && <Row>
+            {data?.movie?._id && <Row>
               <Col xs={6}>
                 <TextInput name='sitRow' label='Seat row' min={0} type={'number'} handleChange={handleChangeData} />
               </Col>

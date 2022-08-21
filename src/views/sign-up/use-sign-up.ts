@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { User } from '../shared/modules/user/model';
 import { Movie } from '../shared/modules/movie/model';
 import { addUser } from '../shared/modules/user/api/add-user';
-import { getMovies } from '../shared/modules/movie/api/get-movies';
+import { getMovies, MOVIES } from '../shared/modules/movie/api/get-movies';
 import { range } from '../shared/utils/common';
 
 export interface HookData {
-  data: User;
+  data: Omit<User, '_id'>;
   movies: Movie[];
   sitRows: number[];
   sitPlaces: number[];
@@ -22,7 +22,7 @@ export interface HookData {
 const useSignUp = (): HookData => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<User>({
+  const [data, setData] = useState<Omit<User, '_id'>>({
     firstName: '',
     lastName: '',
     email: '',
@@ -94,7 +94,7 @@ const useSignUp = (): HookData => {
     }
 
     if (name === 'movie') {
-      value = movies.find((movie) => movie.id === value);
+      value = movies.find((movie) => movie._id === value);
     }
 
     setData(
@@ -108,13 +108,12 @@ const useSignUp = (): HookData => {
 
   const handleSubmit = async (e: BaseSyntheticEvent) => {
     e.preventDefault();
-    console.log(data);
     if (data && data.firstName && data.lastName && data.email && data.phone && data.avatarBase64) {
       setLoading(true);
       try {
         await addUser(data);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       } finally {
         setLoading(false);
         navigate('/success');
@@ -124,7 +123,7 @@ const useSignUp = (): HookData => {
 
   return {
     data,
-    movies,
+    movies: movies.length > 0 ? movies : MOVIES,
     sitRows,
     sitPlaces,
     loading,
