@@ -12,7 +12,7 @@ const TextInput: FC<{
   return (
     <Label>
       {label}:
-      <Input name={name} type={type} min={min} onChange={handleChange} />
+      <Input name={name} type={type} min={min} onChange={handleChange} data-testid={name} />
       <label style={{ color: "gray", fontSize: '12px', opacity: error ? '1' : '0' }} htmlFor="message">
         *Required field
       </label>

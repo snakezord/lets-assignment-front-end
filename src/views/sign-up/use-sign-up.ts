@@ -1,17 +1,17 @@
-import { useState, useEffect, useMemo, BaseSyntheticEvent } from 'react';
+import { useState, useEffect, BaseSyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { User } from '../shared/modules/user/model';
 import { Movie } from '../shared/modules/movie/model';
 import { addUser } from '../shared/modules/user/api/add-user';
 import { getMovies, MOVIES } from '../shared/modules/movie/api/get-movies';
-import { range } from '../shared/utils/common';
+// import { range } from '../shared/utils/common';
 
 export interface HookData {
   data: Omit<User, '_id'>;
   movies: Movie[];
-  sitRows: number[];
-  sitPlaces: number[];
+  // sitRows: number[];
+  // sitPlaces: number[];
   loading: boolean;
   handleChangeData: (e: BaseSyntheticEvent) => void;
   handleChangeAvatar: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -35,20 +35,20 @@ const useSignUp = (): HookData => {
 
   const [movies, setMovies] = useState<Movie[]>([]);
 
-  const sitRows = useMemo(() => {
-    return range(1, 15);
-  }, []);
+  // const sitRows = useMemo(() => {
+  //   return range(1, 15);
+  // }, []);
 
-  const sitPlaces = useMemo(() => {
-    return range(1, 45);
-  }, []);
+  // const sitPlaces = useMemo(() => {
+  //   return range(1, 45);
+  // }, []);
 
   // FILL IN THE GAPS
   // Handlers go here
   // ...
 
   useEffect(() => {
-    getMovies().then((movies) => setMovies(movies));
+    getMovies().then((movies) => setMovies(movies.length > 0 ? movies : MOVIES));
   }, []);
 
   const handleChangeAvatar = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -112,20 +112,20 @@ const useSignUp = (): HookData => {
       setLoading(true);
       try {
         await addUser(data);
+        navigate('/success');
+        setLoading(false);
       } catch (error) {
         console.error(error);
-      } finally {
         setLoading(false);
-        navigate('/success');
       }
     }
   };
 
   return {
     data,
-    movies: movies.length > 0 ? movies : MOVIES,
-    sitRows,
-    sitPlaces,
+    movies,
+    // sitRows,
+    // sitPlaces,
     loading,
     handleChangeData,
     handleChangeAvatar,
